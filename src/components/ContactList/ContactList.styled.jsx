@@ -15,3 +15,8 @@ export const ContactsList = styled.ul`
 
   /* text-align: start; */
 `;
+
+export const ContactsMessage = styled.span`
+  font-size: ${p => p.theme.fontsSizes.m}px;
+  font-weight: ${p => p.theme.fontWeights.semiBold};
+`;

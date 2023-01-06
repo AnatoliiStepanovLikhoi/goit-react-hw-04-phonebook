@@ -1,4 +1,5 @@
-import React, { Component } from 'react';
+// import React, { Component } from 'react';
+import React, { useState, useEffect } from 'react';
 
 import { ContactForm } from './ContactForm/ContactForm';
 import { ContactList } from './ContactList/ContactList';
@@ -12,63 +13,55 @@ import { capitalizeFirstLetters } from './Utils/capitalizeFirstLetters';
 
 import { Container, MainTitle, SecondaryTitle } from './App.styled';
 
-export class App extends Component {
-  state = {
-    contacts: [
+export const App = () => {
+  const [contacts, setContacts] = useState(() => {
+    const defaultContacts = [
       { id: 'id-1', name: 'Rosie Simpson', number: '459-12-56' },
       { id: 'id-2', name: 'Hermione Kline', number: '443-89-12' },
       { id: 'id-3', name: 'Eden Clements', number: '645-17-79' },
       { id: 'id-4', name: 'Annie Copeland', number: '227-91-26' },
-    ],
-    filter: '',
-    // name: '',
-    // number: '',
-    // showModal: false,
-  };
+    ];
+    const parsedContacts = JSON.parse(localStorage.getItem('contacts'));
 
-  checkTheSameName = inputName => {
+    return parsedContacts ?? defaultContacts;
+  });
+
+  const [filter, setFilter] = useState('');
+  // const [modal, setModal] = useState(false);
+
+  const checkTheSameName = inputName => {
     const normaliziedInputName = inputName.toLowerCase().trim();
+    // console.log(normaliziedInputName);
 
-    console.log(normaliziedInputName);
-
-    return this.state.contacts.find(
+    return contacts.find(
       ({ name }) => name.toLowerCase() === normaliziedInputName
     );
   };
 
-  onContactFormSubmit = ({ name, number, id }) => {
+  const onContactFormSubmit = ({ name, number, id }) => {
     const capitalName = capitalizeFirstLetters(name);
 
-    if (this.checkTheSameName(name)) {
+    if (checkTheSameName(name)) {
       alert(`Sorry, ${capitalName} has already added!`);
       return;
     }
 
-    this.setState(prevState => {
-      return {
-        contacts: [...prevState.contacts, { name, number, id }],
-      };
-    });
+    setContacts(prevState => [...prevState, { name, number, id }]);
   };
 
-  onContactFilter = filterName => {
-    this.setState({
-      filter: filterName,
-    });
+  const onContactFilter = filterName => {
+    setFilter(filterName);
   };
 
-  onContactDelete = contactToDelete => {
-    this.setState(prevState => {
-      return {
-        contacts: prevState.contacts.filter(({ id }) => {
-          return id !== contactToDelete;
-        }),
-      };
-    });
+  const onContactDelete = contactToDelete => {
+    setContacts(prevState =>
+      prevState.filter(({ id }) => id !== contactToDelete)
+    );
+
+    alert(`Contact has been deleted!`);
   };
 
-  filterCurrentContacts = filterName => {
-    const { contacts } = this.state;
+  const filterCurrentContacts = filterName => {
     const normaliziedFilterName = filterName.toLowerCase().trim();
 
     return contacts.filter(({ name }) =>
@@ -76,53 +69,32 @@ export class App extends Component {
     );
   };
 
-  componentDidMount() {
-    // console.log('маунт додатка');
+  // useEffect(() => {
+  //   const storadeContacts = localStorage.getItem('contacts');
+  //   const parsedContacts = JSON.parse(storadeContacts);
 
-    const contacts = localStorage.getItem('contacts');
-    const parsedContacts = JSON.parse(contacts);
+  //   if (parsedContacts) {
+  //     setContacts(parsedContacts);
+  //   }
+  // }, []);
 
-    if (parsedContacts) {
-      this.setState({
-        contacts: parsedContacts,
-      });
-    }
-    // console.log(contacts);
-  }
-
-  componentDidUpdate(prevProps, prevState) {
-    if (this.state.contacts !== prevState.contacts) {
-      // console.log('Оновилися контакти');
-
-      localStorage.setItem('contacts', JSON.stringify(this.state.contacts));
-    }
-  }
+  useEffect(() => {
+    localStorage.setItem('contacts', JSON.stringify(contacts));
+  }, [contacts]);
 
   // toggleModal = () => {
-  //   // console.log('закриває');
-  //   this.setState(({ showModal }) => ({
-  //     showModal: !showModal,
-  //   }));
+  //   setModal(!modal)
   // };
 
-  render() {
-    const { contacts, filter } = this.state;
+  const selectedContacts = filter ? filterCurrentContacts(filter) : contacts;
 
-    // const { contacts, filter, showModal } = this.state;
-    // console.log(contacts);
-    // console.log(filter);
-
-    const selectedContacts = filter
-      ? this.filterCurrentContacts(filter)
-      : contacts;
-
-    return (
-      <Container>
-        {/* <button type="button" onClick={this.toggleModal}>
+  return (
+    <Container>
+      {/* <button type="button" onClick={this.toggleModal}>
           Open modal
-        </button>
+        </button> */}
 
-        {showModal && (
+      {/* {showModal && (
           <Modal onClose={this.toggleModal}>
             <h1>Hello, this is content</h1>
             <p>
@@ -136,16 +108,15 @@ export class App extends Component {
           </Modal>
         )} */}
 
-        <MainTitle>Phonebook</MainTitle>
-        <ContactForm onFormSubmit={this.onContactFormSubmit} />
+      <MainTitle>Phonebook</MainTitle>
+      <ContactForm onFormSubmit={onContactFormSubmit} />
 
-        <SecondaryTitle>Contacts</SecondaryTitle>
-        <Filter onFilterInput={this.onContactFilter} value={filter} />
-        <ContactList
-          contacts={selectedContacts}
-          onContactDelete={this.onContactDelete}
-        />
-      </Container>
-    );
-  }
-}
+      <SecondaryTitle>Contacts</SecondaryTitle>
+      <Filter onFilterInput={onContactFilter} value={filter} />
+      <ContactList
+        contacts={selectedContacts}
+        onContactDelete={onContactDelete}
+      />
+    </Container>
+  );
+};

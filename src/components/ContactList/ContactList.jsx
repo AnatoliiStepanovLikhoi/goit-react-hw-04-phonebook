@@ -2,7 +2,7 @@
 import { PropTypes } from 'prop-types';
 import { ContactListItem } from './ContactListItem/ContactListItem';
 
-import { ContactsList } from './ContactList.styled';
+import { ContactsList, ContactsMessage } from './ContactList.styled';
 
 export function ContactList(props) {
   const { contacts, onContactDelete } = props;
@@ -11,13 +11,17 @@ export function ContactList(props) {
 
   return (
     <ContactsList>
-      {contacts.map(contact => (
-        <ContactListItem
-          key={contact.id}
-          contactInfo={contact}
-          onContactDelete={onContactDelete}
-        />
-      ))}
+      {contacts.length ? (
+        contacts.map(contact => (
+          <ContactListItem
+            key={contact.id}
+            contactInfo={contact}
+            onContactDelete={onContactDelete}
+          />
+        ))
+      ) : (
+        <ContactsMessage>We found nothing here:(</ContactsMessage>
+      )}
     </ContactsList>
   );
 }
